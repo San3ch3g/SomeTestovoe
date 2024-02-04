@@ -1,4 +1,3 @@
-// sms_code.go
 package handlers
 
 import (
@@ -97,7 +96,6 @@ func generateRandomCode() string {
 	return fmt.Sprintf("%04d", rand.Intn(10000))
 }
 
-// Структура для хранения информации о SMS-коде
 type SMSCode struct {
 	ID             int       `json:"id"`
 	Code           string    `json:"code"`
