@@ -1,4 +1,3 @@
-// google_login.go
 package handlers
 
 import (
