@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -32,9 +31,7 @@ func main() {
 	initDataBase()
 	defer db.Close()
 
-	// Создаем репозиторий для работы с базой данных
 	dbRepository := repositories.NewDatabaseRepository(db)
-	// Инициализируем таблицы в базе данных
 	dbRepository.InitTables()
 
 	r := gin.Default()
@@ -54,7 +51,6 @@ func main() {
 
 	googleLoginHandler := handlers.NewGoogleLoginHandler(googleOauthConfig, userTokenHandler.GenerateToken, db)
 
-	// Регистрируем маршруты
 	r.POST("/generate-guest-token", guestTokenHandler.Generate)
 
 	authGroup := r.Group("/")
