@@ -1,0 +1,251 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API server for test task in Xenous",
+        "title": "Testovoe v Xenous",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/generate-guest-token": {
+            "post": {
+                "description": "Generating jwt token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GuestToken"
+                ],
+                "summary": "Generate guest token",
+                "responses": {
+                    "201": {
+                        "description": "Some Response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResponseForTokens"
+                        }
+                    },
+                    "500": {
+                        "description": "Error response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/generate-sms-code": {
+            "post": {
+                "description": "Generate sms code to verify phone number",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SmsCode"
+                ],
+                "summary": "Generating sms code",
+                "parameters": [
+                    {
+                        "description": "Some info for generating",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.GenerateRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Some Response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Error response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/google-callback": {
+            "get": {
+                "description": "Callback after redirect",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GoogleLogin"
+                ],
+                "summary": "Callback",
+                "responses": {
+                    "200": {
+                        "description": "Some Response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Error response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Error response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/login-google": {
+            "post": {
+                "description": "Logining",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GoogleLogin"
+                ],
+                "summary": "Loginig",
+                "parameters": [
+                    {
+                        "description": "Data for logining",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LoginRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Some Response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Error response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/verify-sms-code": {
+            "post": {
+                "description": "Verifying sms code to verify phone number",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SmsCode"
+                ],
+                "summary": "Verifying sms code",
+                "parameters": [
+                    {
+                        "description": "Some info for verifying",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.VerifyRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Some Response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Error response",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.GenerateRequest": {
+            "type": "object",
+            "properties": {
+                "idempotencyKey": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "idempotencyKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.Response": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.ResponseForTokens": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.VerifyRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "idempotencyKey": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

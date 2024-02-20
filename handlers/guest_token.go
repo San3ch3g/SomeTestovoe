@@ -18,6 +18,26 @@ func NewGuestTokenHandler() *GuestTokenHandler {
 	return &GuestTokenHandler{}
 }
 
+type ResponseForTokens struct {
+	Error string `json:"error"`
+	Token string `json:"token"`
+}
+
+type Header struct {
+	Authorization string `json:"Authorization"`
+}
+
+// GenerateGuestToken godoc
+//
+//	@Summary		Generate guest token
+//	@Description	Generating jwt token
+//	@Tags			GuestToken
+//	@Produce		json
+//	@Success		201	{object}	ResponseForTokens	"Some Response"
+//
+//	@Failure		500	{object}	Response			"Error response"
+//
+//	@Router			/generate-guest-token [post]
 func (h *GuestTokenHandler) Generate(c *gin.Context) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
@@ -26,9 +46,9 @@ func (h *GuestTokenHandler) Generate(c *gin.Context) {
 
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при создании токена"})
+		c.JSON(http.StatusInternalServerError, ResponseForTokens{Error: "error with generating jwt token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	c.JSON(http.StatusCreated, ResponseForTokens{Token: tokenString})
 }

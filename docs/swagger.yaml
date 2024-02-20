@@ -1,0 +1,162 @@
+basePath: /
+definitions:
+  handlers.GenerateRequest:
+    properties:
+      idempotencyKey:
+        type: string
+      phoneNumber:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    properties:
+      idempotencyKey:
+        type: string
+    type: object
+  handlers.Response:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+  handlers.ResponseForTokens:
+    properties:
+      error:
+        type: string
+      token:
+        type: string
+    type: object
+  handlers.VerifyRequest:
+    properties:
+      code:
+        type: string
+      idempotencyKey:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API server for test task in Xenous
+  title: Testovoe v Xenous
+  version: "1.0"
+paths:
+  /generate-guest-token:
+    post:
+      description: Generating jwt token
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Some Response
+          schema:
+            $ref: '#/definitions/handlers.ResponseForTokens'
+        "500":
+          description: Error response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Generate guest token
+      tags:
+      - GuestToken
+  /generate-sms-code:
+    post:
+      description: Generate sms code to verify phone number
+      parameters:
+      - description: Some info for generating
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.GenerateRequest'
+      - in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Some Response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Error response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Generating sms code
+      tags:
+      - SmsCode
+  /google-callback:
+    get:
+      description: Callback after redirect
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Some Response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Error response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "500":
+          description: Error response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Callback
+      tags:
+      - GoogleLogin
+  /login-google:
+    post:
+      description: Logining
+      parameters:
+      - description: Data for logining
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      - in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Some Response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Error response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Loginig
+      tags:
+      - GoogleLogin
+  /verify-sms-code:
+    post:
+      description: Verifying sms code to verify phone number
+      parameters:
+      - description: Some info for verifying
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.VerifyRequest'
+      - in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Some Response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+        "400":
+          description: Error response
+          schema:
+            $ref: '#/definitions/handlers.Response'
+      summary: Verifying sms code
+      tags:
+      - SmsCode
+swagger: "2.0"

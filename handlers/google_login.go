@@ -1,4 +1,3 @@
-// google_login.go
 package handlers
 
 import (
@@ -20,6 +19,14 @@ type GoogleLoginHandler struct {
 	db            *sql.DB
 }
 
+type LoginRequest struct {
+	IdempotencyKey string `json:"idempotencyKey"`
+}
+type CallbackRequest struct {
+	IdempotencyKey string `json:"idempotencyKey"`
+	OauthCode      string `json:"code"`
+}
+
 func NewGoogleLoginHandler(oauthConfig *oauth2.Config, userTokenFunc func(email string, idempotencyKey string) string, db *sql.DB) *GoogleLoginHandler {
 	return &GoogleLoginHandler{
 		oauthConfig:   oauthConfig,
@@ -28,19 +35,51 @@ func NewGoogleLoginHandler(oauthConfig *oauth2.Config, userTokenFunc func(email 
 	}
 }
 
+// Login godoc
+//
+//	@Summary		Loginig
+//	@Description	Logining
+//	@Tags			GoogleLogin
+//	@Produce		json
+//	@Param			input	body		LoginRequest	true	"Data for logining"
+//	@Param			input	header		Header			true	"jwt token"
+//	@Success		200		{object}	Response		"Some Response"
+//
+//	@Failure		400		{object}	Response		"Error response"
+//
+//	@Router			/login-google [post]
 func (h *GoogleLoginHandler) Login(c *gin.Context) {
-	idempotencyKey := c.PostForm("idempotencyKey")
+	var loginRequest LoginRequest
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusBadRequest, Response{Error: "Error with reading requst"})
+		return
+	}
 
-	url := h.oauthConfig.AuthCodeURL(idempotencyKey, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
+	url := h.oauthConfig.AuthCodeURL(loginRequest.IdempotencyKey, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 	fmt.Println(url)
 	http.Redirect(c.Writer, c.Request, url, http.StatusTemporaryRedirect)
 }
 
+// Callback godoc
+//
+//	@Summary		Callback
+//	@Description	Callback after redirect
+//	@Tags			GoogleLogin
+//	@Produce		json
+//	@Success		200	{object}	Response	"Some Response"
+//
+//	@Failure		400	{object}	Response	"Error response"
+//	@Failure		500	{object}	Response	"Error response"
+//
+//	@Router			/google-callback [get]
 func (h *GoogleLoginHandler) Callback(c *gin.Context) {
-	idempotencyKey := c.Query("state")
-	oauthCode := c.Query("code")
+	var callbackRequest CallbackRequest
+	if err := c.ShouldBindQuery(&callbackRequest); err != nil {
+		c.JSON(http.StatusBadRequest, Response{Error: "Error with reading request"})
+		return
+	}
 
-	token, err := h.oauthConfig.Exchange(context.Background(), oauthCode)
+	token, err := h.oauthConfig.Exchange(context.Background(), callbackRequest.OauthCode)
 	if err != nil {
 		log.Printf("Failed to exchange OAuth code: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Failed to exchange OAuth code: %s", err.Error())})
@@ -85,14 +124,13 @@ func (h *GoogleLoginHandler) Callback(c *gin.Context) {
 
 		if err != nil {
 			log.Printf("Failed to insert user into the database: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to insert user into the database: %s", err.Error())})
+			c.JSON(http.StatusInternalServerError, Response{Error: fmt.Sprintf("Failed to insert user into the database: %s", err.Error())})
 			return
 		}
 
 		log.Printf("User inserted into the database: %s", email)
 	}
-
-	newToken := h.userTokenFunc(email, idempotencyKey)
+	newToken := h.userTokenFunc(email, callbackRequest.IdempotencyKey)
 	log.Printf("Token generated successfully for user: %s", email)
-	c.JSON(http.StatusOK, gin.H{"token": newToken})
+	c.JSON(http.StatusOK, ResponseForTokens{Token: newToken})
 }

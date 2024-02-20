@@ -8,12 +8,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// UserTokenHandler обрабатывает токены пользователей.
 type UserTokenHandler struct {
 	secretKey string
 }
 
-// NewUserTokenHandler создает новый экземпляр UserTokenHandler.
 func NewUserTokenHandler(secretKey string) *UserTokenHandler {
 	return &UserTokenHandler{
 		secretKey: secretKey,

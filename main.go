@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -6,8 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	docs "ModuleForTestTask/docs"
 	"ModuleForTestTask/handlers"
 	"ModuleForTestTask/repositories"
+
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -15,11 +18,17 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+//	@title			Testovoe v Xenous
+//	@version		1.0
+//	@description	API server for test task in Xenous
+//	@host			localhost:8080
+//	@BasePath		/
+
 const (
-	dbUsername         = "sql11681286"
-	dbPassword         = "wD4a4d2TfY"
-	dbHost             = "sql11.freemysqlhosting.net"
-	dbName             = "sql11681286"
+	dbUsername         = "sql8685323"
+	dbPassword         = "KBfhMcltzX"
+	dbHost             = "sql8.freemysqlhosting.net"
+	dbName             = "sql8685323"
 	googleClientID     = "462095042255-6ihrp0qc3n7hdarfjr6sul1ikeg2pnrn.apps.googleusercontent.com"
 	googleClientSecret = "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"
 	serverPort         = ":8080"
@@ -32,14 +41,11 @@ func main() {
 	initDataBase()
 	defer db.Close()
 
-	// Создаем репозиторий для работы с базой данных
 	dbRepository := repositories.NewDatabaseRepository(db)
-	// Инициализируем таблицы в базе данных
 	dbRepository.InitTables()
 
 	r := gin.Default()
 
-	// Создаем хендлеры
 	guestTokenHandler := handlers.NewGuestTokenHandler()
 	authHandler := handlers.NewAuthHandler()
 	smsCodeHandler := handlers.NewSMSCodeHandler(db)
@@ -54,7 +60,6 @@ func main() {
 
 	googleLoginHandler := handlers.NewGoogleLoginHandler(googleOauthConfig, userTokenHandler.GenerateToken, db)
 
-	// Регистрируем маршруты
 	r.POST("/generate-guest-token", guestTokenHandler.Generate)
 
 	authGroup := r.Group("/")
@@ -65,6 +70,8 @@ func main() {
 		authGroup.POST("/login-google", googleLoginHandler.Login)
 		r.GET("/google-callback", googleLoginHandler.Callback)
 	}
+	docs.SwaggerInfo.BasePath = "/"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	if err := r.Run(serverPort); err != nil {
 		log.Fatal(err)
